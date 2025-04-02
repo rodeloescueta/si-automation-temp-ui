@@ -9,14 +9,22 @@ export interface Template {
   content: string;
 }
 
+import { AttioRecord } from "@/types/attio";
+
 export const replaceVariables = (
   template: string,
-  data: Record<string, any>
+  data: Record<string, unknown>
 ): string => {
   return template.replace(/\{\{([^}]+)\}\}/g, (match, key) => {
     const value = key
       .split(".")
-      .reduce((obj: any, k: string) => obj?.[k], data);
+      .reduce(
+        (obj: Record<string, unknown>, k: string) =>
+          obj && typeof obj === "object"
+            ? (obj[k] as Record<string, unknown>)
+            : undefined,
+        data
+      );
     return value !== undefined ? String(value) : match;
   });
 };
@@ -26,14 +34,14 @@ export const extractVariables = (template: string): string[] => {
   return matches.map((match) => match.slice(2, -2));
 };
 
-export const formatAttioData = (data: any): Record<string, any> => {
-  const formatted: Record<string, any> = {};
+export const formatAttioData = (data: AttioRecord): Record<string, unknown> => {
+  const formatted: Record<string, unknown> = {};
 
-  // Handle nested values structure from Attio API
-  if (data?.values) {
-    Object.entries(data.values).forEach(([key, value]: [string, any]) => {
-      if (Array.isArray(value) && value.length > 0) {
-        formatted[key] = value[0].value;
+  // Handle nested fields structure from Attio API
+  if (data?.fields) {
+    Object.entries(data.fields).forEach(([key, field]) => {
+      if (field && "value" in field) {
+        formatted[key] = field.value;
       }
     });
   }

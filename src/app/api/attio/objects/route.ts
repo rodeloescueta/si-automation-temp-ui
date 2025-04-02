@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     if (!process.env.ATTIO_API_TOKEN) {
       return NextResponse.json(

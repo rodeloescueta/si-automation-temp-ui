@@ -17,10 +17,9 @@ export async function fetchAttioRecord(id: string): Promise<AttioRecord> {
 /**
  * Helper function to extract a field value from an Attio record
  */
-export function getFieldValue<T = any>(
-  record: AttioRecord,
-  fieldName: string
-): T | null {
+export function getFieldValue<
+  T = string | number | boolean | null | Record<string, unknown>
+>(record: AttioRecord, fieldName: string): T | null {
   if (
     !record?.fields ||
     !record.fields[fieldName as keyof typeof record.fields]
@@ -28,7 +27,9 @@ export function getFieldValue<T = any>(
     return null;
   }
 
-  return record.fields[fieldName as keyof typeof record.fields]?.value || null;
+  return (
+    (record.fields[fieldName as keyof typeof record.fields]?.value as T) || null
+  );
 }
 
 /**

@@ -1,13 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// This is the correct format for Next.js App Router API routes with dynamic segments
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    // Await and destructure the ID parameter
-    const { id } = await Promise.resolve(params);
+    const { id } = params;
 
     if (!id) {
       return NextResponse.json(

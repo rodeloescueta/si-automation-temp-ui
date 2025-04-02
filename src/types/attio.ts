@@ -5,7 +5,7 @@
 // Base record field type
 export interface AttioRecordField {
   id: string;
-  value: any;
+  value: string | number | boolean | null | Record<string, unknown>;
   display_value?: string;
   type: string;
 }
@@ -54,5 +54,5 @@ export interface AttioRecord {
 export interface AttioErrorResponse {
   message: string;
   code?: string;
-  details?: any;
+  details?: Record<string, unknown>;
 }

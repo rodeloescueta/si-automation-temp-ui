@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -11,16 +11,24 @@ import {
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
+import { AttioRecord } from "@/types/attio";
+
+interface AttioObject {
+  id: string;
+  name: string;
+  slug: string;
+  workspace_id: string;
+}
 
 export default function AttioDebug() {
-  const [objects, setObjects] = useState<any>(null);
+  const [objects, setObjects] = useState<AttioObject[] | null>(null);
   const [isLoadingObjects, setIsLoadingObjects] = useState(false);
   const [objectsError, setObjectsError] = useState<string | null>(null);
 
   const [recordId, setRecordId] = useState<string>(
     "b5659af3-3418-4f62-aede-748aec4b73f3"
   );
-  const [record, setRecord] = useState<any>(null);
+  const [record, setRecord] = useState<AttioRecord | null>(null);
   const [isLoadingRecord, setIsLoadingRecord] = useState(false);
   const [recordError, setRecordError] = useState<string | null>(null);
 

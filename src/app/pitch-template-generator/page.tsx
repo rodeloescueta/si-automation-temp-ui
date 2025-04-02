@@ -10,12 +10,13 @@ import {
   formatAttioData,
   replaceVariables,
 } from "@/lib/utils/template";
+import { AttioRecord } from "@/types/attio";
 
 export default function PitchTemplateGenerator() {
   const [recordId, setRecordId] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<AttioRecord | null>(null);
   const [templates, setTemplates] = useState<Template[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(
     null
