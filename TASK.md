@@ -76,21 +76,27 @@ _(Add new tasks discovered during development here)_
 - [x] Fix Next.js route parameter handling
 - [x] Update types for lead records
 - [x] Configure environment variables
+- [x] Create pitch template directory structure
+- [x] Implement template selection feature
+- [x] Add template variable replacement
+- [x] Create sample pitch templates
 
 ### In Progress
 
-- [ ] Implement pitch template generation logic
 - [ ] Add template customization options
 - [ ] Create template preview component
+- [ ] Add template saving functionality
 
 ### To Do
 
-- [ ] Add template saving functionality
 - [ ] Implement template versioning
 - [ ] Add export options (PDF, Word, etc.)
 - [ ] Add user preferences
 - [ ] Implement authentication
 - [ ] Add analytics tracking
+- [ ] Add template management UI (create, edit, delete templates)
+- [ ] Add template categories/tags
+- [ ] Implement template search/filter
 
 ## Technical Improvements
 
@@ -99,6 +105,9 @@ _(Add new tasks discovered during development here)_
 - [ ] Implement caching strategy
 - [ ] Add performance monitoring
 - [ ] Set up logging system
+- [ ] Add template validation
+- [ ] Implement error boundaries
+- [ ] Add loading states for template operations
 
 ## Documentation
 
@@ -106,3 +115,5 @@ _(Add new tasks discovered during development here)_
 - [ ] Create user guide
 - [ ] Document template creation process
 - [ ] Add developer setup guide
+- [ ] Document template variable syntax
+- [ ] Create template authoring guide

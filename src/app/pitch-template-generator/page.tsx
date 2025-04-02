@@ -1,88 +1,153 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Alert } from "@/components/ui/alert";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { RecordIdInput } from "@/components/features/record-id-input";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
-import { fetchAttioRecord } from "@/lib/api/attio";
-import { AttioRecord } from "@/types/attio";
+  Template,
+  formatAttioData,
+  replaceVariables,
+} from "@/lib/utils/template";
 
 export default function PitchTemplateGenerator() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [recordData, setRecordData] = useState<AttioRecord | null>(null);
+  const [recordId, setRecordId] = useState("");
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [data, setData] = useState<any>(null);
+  const [templates, setTemplates] = useState<Template[]>([]);
+  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(
+    null
+  );
+  const [generatedContent, setGeneratedContent] = useState<string>("");
 
-  const handleSearch = async (recordId: string) => {
-    setIsLoading(true);
+  // Load templates on mount
+  useEffect(() => {
+    const fetchTemplates = async () => {
+      try {
+        const response = await fetch("/api/templates");
+        if (!response.ok) throw new Error("Failed to load templates");
+        const data = await response.json();
+        setTemplates(data);
+      } catch (error) {
+        console.error("Error loading templates:", error);
+        setError("Failed to load templates");
+      }
+    };
+
+    fetchTemplates();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
     setError(null);
-    setRecordData(null);
+    setData(null);
 
     try {
-      // Add loading delay to improve UX
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      const response = await fetch(`/api/attio/records/${recordId}`);
+      const result = await response.json();
 
-      const data = await fetchAttioRecord(recordId);
-      setRecordData(data);
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "An error occurred";
-      setError(errorMessage);
-      console.error("Error fetching record:", err);
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to fetch record");
+      }
+
+      setData(result.data);
+
+      // If there's a selected template, generate content
+      if (selectedTemplate) {
+        const formattedData = formatAttioData(result.data);
+        const content = replaceVariables(
+          selectedTemplate.content,
+          formattedData
+        );
+        setGeneratedContent(content);
+      }
+    } catch (error) {
+      console.error("Error fetching record:", error);
+      setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
-      setIsLoading(false);
+      setLoading(false);
+    }
+  };
+
+  const handleTemplateSelect = (template: Template) => {
+    setSelectedTemplate(template);
+    if (data) {
+      const formattedData = formatAttioData(data);
+      const content = replaceVariables(template.content, formattedData);
+      setGeneratedContent(content);
     }
   };
 
   return (
-    <div className="container mx-auto py-8">
-      <Card>
-        <CardHeader>
-          <CardTitle>Pitch Template Generator</CardTitle>
-          <CardDescription>
-            Generate personalized pitch templates using Attio CRM data
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="mb-6">
-            <p className="text-sm text-muted-foreground mb-2">
-              Enter an Attio lead record ID to fetch the data and generate a
-              pitch template
-            </p>
-            <RecordIdInput onSearch={handleSearch} isLoading={isLoading} />
-            <p className="text-xs text-muted-foreground mt-2">
-              Example Lead ID: b5659af3-3418-4f62-aede-748aec4b73f3
-            </p>
+    <div className="container mx-auto p-4 space-y-4">
+      <h1 className="text-2xl font-bold mb-4">Pitch Template Generator</h1>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label htmlFor="recordId" className="block text-sm font-medium mb-2">
+            Attio Lead Record ID
+          </label>
+          <div className="flex gap-2">
+            <Input
+              id="recordId"
+              value={recordId}
+              onChange={(e) => setRecordId(e.target.value)}
+              placeholder="e.g., b5659af3-3418-4f62-aede-748aec4b73f3"
+              className="flex-1"
+            />
+            <Button type="submit" disabled={loading}>
+              {loading ? "Loading..." : "Fetch Data"}
+            </Button>
           </div>
+        </div>
+      </form>
 
-          {error && (
-            <Alert variant="destructive" className="mt-4">
-              <ExclamationTriangleIcon className="h-4 w-4" />
-              <AlertTitle>Error</AlertTitle>
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
+      {error && (
+        <Alert variant="destructive">
+          <p>{error}</p>
+        </Alert>
+      )}
 
-          {recordData && (
-            <div className="mt-4 space-y-6">
-              <div>
-                <h3 className="text-lg font-medium mb-2">Lead Data:</h3>
-                <pre className="bg-slate-100 dark:bg-slate-800 p-4 rounded-lg overflow-auto text-sm">
-                  {JSON.stringify(recordData, null, 2)}
-                </pre>
-              </div>
-
-              {/* We'll add the template generation here in the future */}
+      {data && (
+        <div className="space-y-4">
+          <Card className="p-4">
+            <h2 className="text-xl font-semibold mb-4">Select Template</h2>
+            <div className="grid grid-cols-2 gap-4">
+              {templates.map((template) => (
+                <Button
+                  key={template.id}
+                  onClick={() => handleTemplateSelect(template)}
+                  variant={
+                    selectedTemplate?.id === template.id ? "default" : "outline"
+                  }
+                  className="h-auto py-4"
+                >
+                  {template.name}
+                </Button>
+              ))}
             </div>
+          </Card>
+
+          {selectedTemplate && (
+            <Card className="p-4">
+              <h2 className="text-xl font-semibold mb-4">Generated Content</h2>
+              <div className="whitespace-pre-wrap font-mono bg-muted p-4 rounded">
+                {generatedContent}
+              </div>
+            </Card>
           )}
-        </CardContent>
-      </Card>
+
+          <Card className="p-4">
+            <h2 className="text-xl font-semibold mb-4">Lead Data</h2>
+            <pre className="whitespace-pre-wrap bg-muted p-4 rounded">
+              {JSON.stringify(data, null, 2)}
+            </pre>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }
