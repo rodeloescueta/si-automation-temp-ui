@@ -2,52 +2,36 @@
  * Attio API Types
  */
 
-// Base record field type
-export interface AttioRecordField {
-  id: string;
-  value: string | number | boolean | null | Record<string, unknown>;
-  display_value?: string;
-  type: string;
+// Field value types
+export interface AttioFieldValue {
+  active_from: string;
+  active_until: string | null;
+  created_by_actor: {
+    type: string;
+    id: string;
+  };
+  value: string | number | boolean | null;
+  attribute_type?: string;
+  referenced_actor_type?: string;
+  referenced_actor_id?: string;
+  target_object?: string;
+  target_record_id?: string;
 }
 
-// Common record fields
-export interface AttioCommonFields {
-  id: AttioRecordField;
-  created_at: AttioRecordField;
-  updated_at: AttioRecordField;
+// Record ID structure
+export interface AttioRecordId {
+  workspace_id: string;
+  object_id: string;
+  record_id: string;
 }
 
-// Lead record fields
-export interface AttioLeadFields extends AttioCommonFields {
-  name?: AttioRecordField;
-  email?: AttioRecordField;
-  phone?: AttioRecordField;
-  company?: AttioRecordField;
-  position?: AttioRecordField;
-  status?: AttioRecordField;
-  source?: AttioRecordField;
-  lead_owner?: AttioRecordField;
-  linkedin_url?: AttioRecordField;
-  notes?: AttioRecordField;
-  // Add other fields as needed
-}
-
-// Deal record fields
-export interface AttioDealFields extends AttioCommonFields {
-  sales_client_id?: AttioRecordField;
-  lead_id?: AttioRecordField;
-  sales_representative_id?: AttioRecordField;
-  lead_representative_id?: AttioRecordField;
-  source?: AttioRecordField;
-  // Add other fields as needed
-}
-
-// Record response
+// Complete Attio Record structure based on actual API response
 export interface AttioRecord {
-  id: string;
-  object: string;
-  fields: AttioLeadFields | AttioDealFields;
-  // Add other properties as needed
+  id: AttioRecordId;
+  created_at: string;
+  values: {
+    [key: string]: AttioFieldValue[];
+  };
 }
 
 // Error response

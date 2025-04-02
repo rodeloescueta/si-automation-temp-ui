@@ -37,13 +37,24 @@ export const extractVariables = (template: string): string[] => {
 export const formatAttioData = (data: AttioRecord): Record<string, unknown> => {
   const formatted: Record<string, unknown> = {};
 
-  // Handle nested fields structure from Attio API
-  if (data?.fields) {
-    Object.entries(data.fields).forEach(([key, field]) => {
-      if (field && "value" in field) {
-        formatted[key] = field.value;
+  // Handle the actual Attio API response structure
+  if (data?.values) {
+    // Iterate through all fields in the values object
+    Object.entries(data.values).forEach(([key, fieldArray]) => {
+      // Check if the field has values (is an array with at least one item)
+      if (Array.isArray(fieldArray) && fieldArray.length > 0) {
+        // Use the first value in the array (most recent)
+        const field = fieldArray[0];
+        if (field && "value" in field) {
+          formatted[key] = field.value;
+        }
       }
     });
+  }
+
+  // Add ID information if available
+  if (data?.id) {
+    formatted.id = data.id;
   }
 
   return formatted;
